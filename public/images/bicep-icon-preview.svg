@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Flexed bicep icon preview</title>
+  <g fill="none" stroke="#71802f" stroke-width="34" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M96 368c-8-16 0-40 8-64C128 192 176 88 248 64c32-10 56 8 64 32 8 24-8 48-32 64-24 16-48 8-56-16"/>
+    <path d="M224 144c-8 40-8 80 0 120-16 24-32 40-56 56"/>
+    <path d="M224 264c48-32 96-32 136 0 32-32 80-24 96 16 8 24 8 80 0 112-8 40-56 56-128 64-96 8-184-8-232-40"/>
+  </g>
+</svg>
