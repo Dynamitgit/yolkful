@@ -6,20 +6,27 @@
 
     <title>@yield('title', 'Yolkful')</title>
 
-    <meta
-        name="description"
-        content="@yield('description', 'High-protein breakfast recipes for real mornings.')"
-    >
+<meta name="description" content="@yield('description', 'High-protein breakfast recipes for real mornings.')">
 
-    <meta property="og:title" content="@yield('title', 'Yolkful')">
-<meta
-    property="og:description"
-    content="@yield('description', 'High-protein breakfast recipes for real mornings.')"
->
-<meta property="og:type" content="website">
-<meta property="og:image" content="{{ asset('images/yolkful-hero-breakfast.png') }}">
-<meta property="og:url" content="{{ url()->current() }}">
+@yield('structured_data')
+
+{{-- Canonical URL --}}
+<link rel="canonical" href="@yield('canonical', url()->current())">
+
+{{-- Open Graph --}}
+<meta property="og:title" content="@yield('title', 'Yolkful')">
+<meta property="og:description" content="@yield('description', 'High-protein breakfast recipes for real mornings.')">
+<meta property="og:type" content="@yield('og_type', 'website')">
+<meta property="og:site_name" content="Yolkful">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="@yield('og_image', asset('images/yolkful-hero-breakfast.png'))">
+<meta property="og:url" content="@yield('og_url', url()->current())">
+
+{{-- Twitter --}}
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="@yield('title', 'Yolkful')">
+<meta name="twitter:description" content="@yield('description', 'High-protein breakfast recipes for real mornings.')">
+<meta name="twitter:image" content="@yield('og_image', asset('images/yolkful-hero-breakfast.png'))">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -587,6 +594,8 @@
         @endif
 
         @yield('content')
+
+        @stack('structured_data')
 
     </main>
 

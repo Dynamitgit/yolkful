@@ -1,4 +1,3 @@
-```blade
 @extends('layouts.blog')
 
 @section('title', $post->title)
@@ -7,13 +6,22 @@
 
 @section('og_image', $post->image ? asset('storage/' . $post->image) : asset('images/default-cover.jpg'))
 
+
 @section('content')
+
+    {{-- Main Post --}}
     <div class="bg-white rounded-2xl shadow-sm p-8 border border-gold-100">
 
-        <a href="{{ route('posts.index') }}" class="text-gold-600 hover:underline text-sm">
+        {{-- Back --}}
+        <a
+            href="{{ route('posts.index') }}"
+            class="text-gold-600 hover:underline text-sm"
+        >
             ← Back to articles
         </a>
 
+
+        {{-- Cover Image --}}
         @if($post->image)
             <img
                 src="{{ asset('storage/' . $post->image) }}"
@@ -22,10 +30,14 @@
             >
         @endif
 
+
+        {{-- Category --}}
         <span class="text-xs text-gold-600 font-semibold uppercase tracking-wide">
             {{ $post->category->name ?? 'No category' }}
         </span>
 
+
+        {{-- Title --}}
         <h1 class="font-serif text-4xl font-bold text-gray-800 mt-2">
             {{ $post->title }}
 
@@ -36,7 +48,10 @@
             @endif
         </h1>
 
+
+        {{-- Post Meta --}}
         <div class="text-sm text-gray-500 mt-2 mb-6">
+
             By
 
             @if($post->user)
@@ -52,7 +67,237 @@
 
             — {{ $post->created_at->format('d/m/Y') }}
             — 👁️ {{ $post->views }} views
+
         </div>
+
+
+        {{-- ========================================================= --}}
+        {{-- Recipe Card --}}
+        {{-- ========================================================= --}}
+
+        @if(
+            $post->prep_time ||
+            $post->cook_time ||
+            $post->servings ||
+            $post->calories ||
+            $post->protein ||
+            !empty($post->ingredients) ||
+            !empty($post->instructions)
+        )
+
+            <div class="my-8 rounded-2xl border border-gold-100 bg-gold-50/30 overflow-hidden">
+
+                {{-- Recipe Header --}}
+                <div class="px-6 py-5 border-b border-gold-100 bg-white">
+
+                    <h2 class="font-serif text-2xl font-bold text-gray-800">
+                        🍳 Recipe
+                    </h2>
+
+                    <p class="text-sm text-gray-500 mt-1">
+                        Everything you need to make this recipe.
+                    </p>
+
+                </div>
+
+
+                {{-- Recipe Stats --}}
+                @if(
+                    $post->prep_time ||
+                    $post->cook_time ||
+                    $post->servings ||
+                    $post->calories ||
+                    $post->protein
+                )
+
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-px bg-gold-100">
+
+                        {{-- Prep Time --}}
+                        @if($post->prep_time)
+                            <div class="bg-white p-4 text-center">
+                                <div class="text-xl mb-1">⏱️</div>
+
+                                <div class="text-xs uppercase tracking-wide text-gray-400">
+                                    Prep Time
+                                </div>
+
+                                <div class="font-semibold text-gray-800 mt-1">
+                                    {{ $post->prep_time }} min
+                                </div>
+                            </div>
+                        @endif
+
+
+                        {{-- Cook Time --}}
+                        @if($post->cook_time)
+                            <div class="bg-white p-4 text-center">
+                                <div class="text-xl mb-1">🍳</div>
+
+                                <div class="text-xs uppercase tracking-wide text-gray-400">
+                                    Cook Time
+                                </div>
+
+                                <div class="font-semibold text-gray-800 mt-1">
+                                    {{ $post->cook_time }} min
+                                </div>
+                            </div>
+                        @endif
+
+
+                        {{-- Total Time --}}
+                        @if($post->prep_time || $post->cook_time)
+                            <div class="bg-white p-4 text-center">
+                                <div class="text-xl mb-1">⏰</div>
+
+                                <div class="text-xs uppercase tracking-wide text-gray-400">
+                                    Total Time
+                                </div>
+
+                                <div class="font-semibold text-gray-800 mt-1">
+                                    {{ ($post->prep_time ?? 0) + ($post->cook_time ?? 0) }} min
+                                </div>
+                            </div>
+                        @endif
+
+
+                        {{-- Servings --}}
+                        @if($post->servings)
+                            <div class="bg-white p-4 text-center">
+                                <div class="text-xl mb-1">🍽️</div>
+
+                                <div class="text-xs uppercase tracking-wide text-gray-400">
+                                    Servings
+                                </div>
+
+                                <div class="font-semibold text-gray-800 mt-1">
+                                    {{ $post->servings }}
+                                </div>
+                            </div>
+                        @endif
+
+
+                        {{-- Protein --}}
+                        @if($post->protein)
+                            <div class="bg-white p-4 text-center">
+                                <div class="text-xl mb-1">💪</div>
+
+                                <div class="text-xs uppercase tracking-wide text-gray-400">
+                                    Protein
+                                </div>
+
+                                <div class="font-semibold text-gray-800 mt-1">
+                                    {{ rtrim(rtrim(number_format($post->protein, 2, '.', ''), '0'), '.') }} g
+                                </div>
+                            </div>
+                        @endif
+
+                    </div>
+
+                @endif
+
+
+                {{-- Calories --}}
+                @if($post->calories)
+
+                    <div class="px-6 py-4 bg-white border-t border-gold-100">
+
+                        <div class="flex items-center justify-between">
+
+                            <span class="text-sm text-gray-500">
+                                🔥 Calories per serving
+                            </span>
+
+                            <span class="font-semibold text-gray-800">
+                                {{ $post->calories }} kcal
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                @endif
+
+
+                {{-- Ingredients + Instructions --}}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-6">
+
+                    {{-- Ingredients --}}
+                    @if(!empty($post->ingredients))
+
+                        <div>
+
+                            <h3 class="font-serif text-xl font-bold text-gray-800 mb-4">
+                                🥚 Ingredients
+                            </h3>
+
+                            <ul class="space-y-3">
+
+                                @foreach($post->ingredients as $ingredient)
+
+                                    <li class="flex items-start gap-3">
+
+                                        <span class="mt-1 text-gold-500">
+                                            •
+                                        </span>
+
+                                        <span class="text-gray-700">
+                                            {{ $ingredient }}
+                                        </span>
+
+                                    </li>
+
+                                @endforeach
+
+                            </ul>
+
+                        </div>
+
+                    @endif
+
+
+                    {{-- Instructions --}}
+                    @if(!empty($post->instructions))
+
+                        <div>
+
+                            <h3 class="font-serif text-xl font-bold text-gray-800 mb-4">
+                                👨‍🍳 Instructions
+                            </h3>
+
+                            <ol class="space-y-4">
+
+                                @foreach($post->instructions as $instruction)
+
+                                    <li class="flex items-start gap-3">
+
+                                        <span class="flex-shrink-0 w-7 h-7 rounded-full bg-gold-100 text-gold-700 flex items-center justify-center text-sm font-semibold">
+                                            {{ $loop->iteration }}
+                                        </span>
+
+                                        <span class="text-gray-700 pt-1">
+                                            {{ $instruction }}
+                                        </span>
+
+                                    </li>
+
+                                @endforeach
+
+                            </ol>
+
+                        </div>
+
+                    @endif
+
+                </div>
+
+            </div>
+
+        @endif
+
+
+        {{-- ========================================================= --}}
+        {{-- Article Content --}}
+        {{-- ========================================================= --}}
 
         <div class="prose prose-lg max-w-none prose-headings:text-gray-800 prose-a:text-gold-600">
             {!! $post->content !!}
@@ -61,23 +306,32 @@
 
         {{-- Tags --}}
         @if($post->tags->count())
+
             <div class="mt-6 flex flex-wrap gap-2">
+
                 @foreach($post->tags as $tag)
+
                     <a
                         href="{{ route('tags.show', $tag) }}"
                         class="bg-gold-50 text-gold-700 text-xs px-3 py-1 rounded-full hover:bg-gold-100"
                     >
                         #{{ $tag->name }}
                     </a>
+
                 @endforeach
+
             </div>
+
         @endif
 
 
         {{-- Like button --}}
         <div class="mt-6 flex items-center gap-2">
 
-            <form action="{{ route('posts.like', $post->id) }}" method="POST">
+            <form
+                action="{{ route('posts.like', $post->id) }}"
+                method="POST"
+            >
                 @csrf
 
                 <button
@@ -90,14 +344,17 @@
                     <span class="text-sm text-gray-600">
                         {{ $likeCount }}
                     </span>
+
                 </button>
+
             </form>
 
         </div>
 
 
-        {{-- Actions: Edit / Delete (visible only to the author) --}}
+        {{-- Actions: Edit / Delete --}}
         @if(auth()->id() === $post->user_id)
+
             <div class="flex gap-3 mt-8 pt-6 border-t">
 
                 <a
@@ -121,15 +378,20 @@
                     >
                         🗑️ Delete
                     </button>
+
                 </form>
 
             </div>
+
         @endif
 
     </div>
 
 
+    {{-- ============================================================= --}}
     {{-- Comments Section --}}
+    {{-- ============================================================= --}}
+
     <div class="bg-white rounded-2xl shadow-sm p-8 mt-6 border border-gold-100">
 
         <h2 class="font-serif text-xl font-bold text-gray-800 mb-4">
@@ -139,6 +401,7 @@
 
         {{-- Add comment --}}
         @auth
+
             <form
                 action="{{ route('comments.store', $post->id) }}"
                 method="POST"
@@ -165,17 +428,24 @@
                 >
                     Post comment
                 </button>
+
             </form>
+
         @else
+
             <p class="text-gray-500 mb-6">
+
                 <a
                     href="{{ route('login') }}"
                     class="text-gold-600 hover:underline"
                 >
                     Log in
                 </a>
+
                 to leave a comment.
+
             </p>
+
         @endauth
 
 
@@ -185,6 +455,7 @@
             <div class="border-b py-3 flex justify-between items-start">
 
                 <div>
+
                     <p class="font-semibold text-gray-700">
                         {{ $comment->user->name ?? 'Anonymous' }}
                     </p>
@@ -192,11 +463,13 @@
                     <p class="text-gray-600">
                         {{ $comment->content }}
                     </p>
+
                 </div>
 
 
-                {{-- Only the comment owner sees the delete button --}}
+                {{-- Delete comment --}}
                 @auth
+
                     @if(auth()->id() === $comment->user_id)
 
                         <form
@@ -213,9 +486,11 @@
                             >
                                 Delete
                             </button>
+
                         </form>
 
                     @endif
+
                 @endauth
 
             </div>
@@ -231,7 +506,10 @@
     </div>
 
 
+    {{-- ============================================================= --}}
     {{-- Related Posts --}}
+    {{-- ============================================================= --}}
+
     @if($relatedPosts->count())
 
         <div class="mt-6">
@@ -245,16 +523,18 @@
                 @foreach($relatedPosts as $related)
 
                     <a
-                        href="{{ route('posts.show', $related->id) }}"
+                        href="{{ route('posts.show', $related->slug) }}"
                         class="bg-white rounded-2xl shadow-sm p-4 hover:shadow-lg transition block border border-gold-100"
                     >
 
                         @if($related->image)
+
                             <img
                                 src="{{ asset('storage/' . $related->image) }}"
                                 alt="{{ $related->title }}"
                                 class="w-full h-32 object-cover rounded-xl mb-3"
                             >
+
                         @endif
 
                         <h3 class="font-serif font-bold text-gray-800">

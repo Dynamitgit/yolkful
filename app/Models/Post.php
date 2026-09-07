@@ -15,7 +15,29 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Post extends Model
 {
-    protected $fillable = ['title', 'slug', 'content', 'image', 'status', 'user_id', 'category_id', 'collection_id'];
+    protected $fillable = [
+    'title',
+    'slug',
+    'content',
+    'image',
+    'status',
+    'user_id',
+    'category_id',
+    'collection_id',
+    'prep_time',
+    'cook_time',
+    'servings',
+    'calories',
+    'protein',
+    'ingredients',
+    'instructions',
+    ];
+
+    protected $casts = [
+    'ingredients' => 'array',
+    'instructions' => 'array',
+    ];
+    
     public function user()
     {
         return $this->belongsTo(User::class);

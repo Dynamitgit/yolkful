@@ -9,7 +9,10 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\LandingPageController;
 use Illuminate\Support\Facades\Route;
-
+use App\Models\Post;
+use App\Models\Tag;
+use App\Models\Collection;
+use App\Models\LandingPage;
 
 /*
 |--------------------------------------------------------------------------
@@ -56,6 +59,28 @@ Route::get('/collections/{collection:slug}', [CollectionController::class, 'show
     ->name('collections.show');
 
 
+// XML Sitemap
+Route::get('/sitemap.xml', function () {
+    $posts = Post::where('status', 'published')
+        ->whereNotNull('slug')
+        ->latest('updated_at')
+        ->get();
+
+    $tags = Tag::whereNotNull('slug')->get();
+
+    $collections = Collection::whereNotNull('slug')->get();
+
+    $landingPages = LandingPage::whereNotNull('slug')->get();
+
+    return response()
+        ->view('sitemap', compact(
+            'posts',
+            'tags',
+            'collections',
+            'landingPages'
+        ))
+        ->header('Content-Type', 'application/xml');
+})->name('sitemap');
 
 /*
 |--------------------------------------------------------------------------
@@ -171,9 +196,8 @@ Route::post('/posts/{post}/like', [LikeController::class, 'toggle'])
     ->name('posts.like');
 
 
-// IMPORTANT:
-// This dynamic route MUST come AFTER /posts/create
-Route::get('/posts/{post}', [PostController::class, 'show'])
+// SEO-friendly recipe URL using the post slug
+Route::get('/posts/{post:slug}', [PostController::class, 'show'])
     ->name('posts.show');
 
 

@@ -9,8 +9,8 @@
         @foreach($posts as $post)
         <item>
             <title>{{ $post->title }}</title>
-            <link>{{ route('posts.show', $post->id) }}</link>
-            <guid>{{ route('posts.show', $post->id) }}</guid>
+            <link>{{ route('posts.show', $post->slug) }}</link>
+            <guid>{{ route('posts.show', $post->slug) }}</guid>
             <pubDate>{{ $post->created_at->toRssString() }}</pubDate>
             <description>{{ strip_tags($post->content) }}</description>
         </item>

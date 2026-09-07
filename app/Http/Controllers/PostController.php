@@ -119,9 +119,22 @@ class PostController extends Controller
             'status' => 'required|in:draft,published',
             'image' => 'nullable|image|max:2048',
 
+            // Recipe fields
+            'prep_time' => 'nullable|integer|min:0|max:1440',
+            'cook_time' => 'nullable|integer|min:0|max:1440',
+            'servings' => 'nullable|integer|min:1|max:100',
+            'calories' => 'nullable|integer|min:0|max:10000',
+            'protein' => 'nullable|numeric|min:0|max:1000',
+
+            // Recipe text fields
+            'ingredients_text' => 'nullable|string',
+            'instructions_text' => 'nullable|string',
+
+            // Tags
             'tags' => 'nullable|array',
             'tags.*' => 'exists:tags,id',
         ]);
+
 
         /*
         |--------------------------------------------------------------------------
@@ -141,6 +154,48 @@ class PostController extends Controller
         $validated['slug'] = $slug;
         $validated['user_id'] = auth()->id();
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Convert recipe text into arrays
+        |--------------------------------------------------------------------------
+        */
+
+        $validated['ingredients'] = collect(
+            preg_split(
+                '/\r\n|\r|\n/',
+                $request->input('ingredients_text', '')
+            )
+        )
+            ->map(fn ($item) => trim($item))
+            ->filter()
+            ->values()
+            ->all();
+
+        $validated['instructions'] = collect(
+            preg_split(
+                '/\r\n|\r|\n/',
+                $request->input('instructions_text', '')
+            )
+        )
+            ->map(fn ($item) => trim($item))
+            ->filter()
+            ->values()
+            ->all();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Remove form-only fields
+        |--------------------------------------------------------------------------
+        */
+
+        unset(
+            $validated['ingredients_text'],
+            $validated['instructions_text']
+        );
+
+
         /*
         |--------------------------------------------------------------------------
         | Store image
@@ -153,6 +208,7 @@ class PostController extends Controller
                 ->store('posts', 'public');
         }
 
+
         /*
         |--------------------------------------------------------------------------
         | Create post
@@ -160,6 +216,7 @@ class PostController extends Controller
         */
 
         $post = Post::create($validated);
+
 
         /*
         |--------------------------------------------------------------------------
@@ -329,6 +386,18 @@ class PostController extends Controller
             'status' => 'required|in:draft,published',
             'image' => 'nullable|image|max:2048',
 
+            // Recipe fields
+            'prep_time' => 'nullable|integer|min:0|max:1440',
+            'cook_time' => 'nullable|integer|min:0|max:1440',
+            'servings' => 'nullable|integer|min:1|max:100',
+            'calories' => 'nullable|integer|min:0|max:10000',
+            'protein' => 'nullable|numeric|min:0|max:1000',
+
+            // Recipe text fields
+            'ingredients_text' => 'nullable|string',
+            'instructions_text' => 'nullable|string',
+
+            // Tags
             'tags' => 'nullable|array',
             'tags.*' => 'exists:tags,id',
         ]);
@@ -355,6 +424,47 @@ class PostController extends Controller
         }
 
         $validated['slug'] = $slug;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Convert recipe text into arrays
+        |--------------------------------------------------------------------------
+        */
+
+        $validated['ingredients'] = collect(
+            preg_split(
+                '/\r\n|\r|\n/',
+                $request->input('ingredients_text', '')
+            )
+        )
+            ->map(fn ($item) => trim($item))
+            ->filter()
+            ->values()
+            ->all();
+
+        $validated['instructions'] = collect(
+            preg_split(
+                '/\r\n|\r|\n/',
+                $request->input('instructions_text', '')
+            )
+        )
+            ->map(fn ($item) => trim($item))
+            ->filter()
+            ->values()
+            ->all();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Remove form-only fields
+        |--------------------------------------------------------------------------
+        */
+
+        unset(
+            $validated['ingredients_text'],
+            $validated['instructions_text']
+        );
 
 
         /*
@@ -415,6 +525,7 @@ class PostController extends Controller
             abort(403, 'You are not authorized to delete this post.');
         }
 
+
         /*
         |--------------------------------------------------------------------------
         | Delete image
@@ -424,6 +535,7 @@ class PostController extends Controller
         if ($post->image) {
             Storage::disk('public')->delete($post->image);
         }
+
 
         /*
         |--------------------------------------------------------------------------
@@ -465,7 +577,7 @@ class PostController extends Controller
                 return [
                     'id' => $post->id,
                     'title' => $post->title,
-                    'url' => route('posts.show', $post->id),
+                    'url' => route('posts.show', $post->slug),
                     'image' => $post->image
                         ? asset('storage/' . $post->image)
                         : null,

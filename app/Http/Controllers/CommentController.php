@@ -23,7 +23,7 @@ class CommentController extends Controller
         Comment::create($validated);
 
         return redirect()
-            ->route('posts.show', $post->id)
+            ->route('posts.show', $post->slug)
             ->with('success', 'Comment added successfully!');
     }
 

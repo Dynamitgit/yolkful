@@ -126,8 +126,177 @@
                 </select>
             </div>
 
+            {{-- Recipe Information --}}
+            <div class="mb-8 border border-yellow-100 bg-yellow-50/40 rounded-2xl p-6">
+
+                <h2 class="font-serif text-2xl font-bold text-gray-800 mb-2">
+                    🍳 Recipe Information
+                </h2>
+
+                <p class="text-sm text-gray-500 mb-6">
+                    Add the recipe details used for the recipe card and SEO.
+                </p>
+
+                {{-- Time / Servings --}}
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+
+                    <div>
+                        <label
+                            for="prep_time"
+                            class="block text-gray-700 font-semibold mb-2"
+                        >
+                            Prep time
+                            <span class="font-normal text-gray-400">(minutes)</span>
+                        </label>
+
+                        <input
+                            id="prep_time"
+                            type="number"
+                            name="prep_time"
+                            value="{{ old('prep_time') }}"
+                            min="0"
+                            max="1440"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                            placeholder="10"
+                        >
+                    </div>
+
+                    <div>
+                        <label
+                            for="cook_time"
+                            class="block text-gray-700 font-semibold mb-2"
+                        >
+                            Cook time
+                            <span class="font-normal text-gray-400">(minutes)</span>
+                        </label>
+
+                        <input
+                            id="cook_time"
+                            type="number"
+                            name="cook_time"
+                            value="{{ old('cook_time') }}"
+                            min="0"
+                            max="1440"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                            placeholder="15"
+                        >
+                    </div>
+
+                    <div>
+                        <label
+                            for="servings"
+                            class="block text-gray-700 font-semibold mb-2"
+                        >
+                            Servings
+                        </label>
+
+                        <input
+                            id="servings"
+                            type="number"
+                            name="servings"
+                            value="{{ old('servings') }}"
+                            min="1"
+                            max="100"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                            placeholder="2"
+                        >
+                    </div>
+
+                </div>
+
+                {{-- Nutrition --}}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+
+                    <div>
+                        <label
+                            for="calories"
+                            class="block text-gray-700 font-semibold mb-2"
+                        >
+                            Calories
+                            <span class="font-normal text-gray-400">(per serving)</span>
+                        </label>
+
+                        <input
+                            id="calories"
+                            type="number"
+                            name="calories"
+                            value="{{ old('calories') }}"
+                            min="0"
+                            max="10000"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                            placeholder="450"
+                        >
+                    </div>
+
+                    <div>
+                        <label
+                            for="protein"
+                            class="block text-gray-700 font-semibold mb-2"
+                        >
+                            Protein
+                            <span class="font-normal text-gray-400">(g per serving)</span>
+                        </label>
+
+                        <input
+                            id="protein"
+                            type="number"
+                            name="protein"
+                            value="{{ old('protein') }}"
+                            min="0"
+                            max="1000"
+                            step="0.01"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                            placeholder="30"
+                        >
+                    </div>
+
+                </div>
+
+                {{-- Ingredients --}}
+                <div class="mb-6">
+
+                    <label class="block text-gray-700 font-semibold mb-2">
+                        Ingredients
+                    </label>
+
+                    <p class="text-sm text-gray-400 mb-3">
+                        Add one ingredient per line.
+                    </p>
+
+                    <textarea
+                        name="ingredients_text"
+                        rows="7"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                        placeholder="2 eggs&#10;100g Greek yogurt&#10;40g oats&#10;1 banana&#10;1 tsp honey"
+                    >{{ old('ingredients_text') }}</textarea>
+
+                </div>
+
+                {{-- Instructions --}}
+                <div>
+
+                    <label class="block text-gray-700 font-semibold mb-2">
+                        Instructions
+                    </label>
+
+                    <p class="text-sm text-gray-400 mb-3">
+                        Add one step per line, in the correct order.
+                    </p>
+
+                    <textarea
+                        name="instructions_text"
+                        rows="8"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                        placeholder="Whisk the eggs in a bowl.&#10;Add the Greek yogurt and oats.&#10;Mix until combined.&#10;Cook in a pan over medium heat.&#10;Serve warm."
+                    >{{ old('instructions_text') }}</textarea>
+
+                </div>
+
+            </div>
+
             {{-- Content --}}
             <div class="mb-5">
+
                 <label
                     for="editor"
                     class="block text-gray-700 font-semibold mb-2"
@@ -146,6 +315,7 @@
                     name="content"
                     id="content-input"
                 >
+
             </div>
 
             {{-- Tags --}}

@@ -16,7 +16,7 @@
                 @endif
                 <span class="text-xs text-gold-600 font-semibold uppercase tracking-wide">{{ $post->category->name ?? 'Sans catégorie' }}</span>
                 <h2 class="font-serif text-2xl font-bold text-gray-800 mt-1">
-                    <a href="{{ route('posts.show', $post->id) }}" class="hover:text-gold-600">
+                    <a href="{{ route('posts.show', $post->slug)}}" class="hover:text-gold-600">
                         {{ $post->title }}
                     </a>
                 </h2>
@@ -25,7 +25,7 @@
                 </p>
                 <div class="flex justify-between items-center mt-4 text-sm text-gray-500">
                     <span>{{ $post->created_at->diffForHumans() }}</span>
-                    <a href="{{ route('posts.show', $post->id) }}" class="text-gold-600 font-medium hover:underline">
+                    <a href="{{ route('posts.show', $post->slug) }}" class="text-gold-600 font-medium hover:underline">
                         Read more →
                     </a>
                 </div>

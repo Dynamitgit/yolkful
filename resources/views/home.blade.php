@@ -116,12 +116,47 @@
                         <div class="pm-latest-body">
                             <h3>{{ $post->title }}</h3>
 
-                            <div class="pm-latest-meta">
-                                <span>{{ $post->category->name ?? 'Breakfast' }}</span>
-                                <span class="pm-meta-dot">•</span>
-                                <span>{{ $post->created_at->format('M j, Y') }}</span>
-                            </div>
-                        </div>
+                           <div class="pm-latest-meta">
+    <span>{{ $post->category->name ?? 'Breakfast' }}</span>
+    <span class="pm-meta-dot">•</span>
+    <span>{{ $post->created_at->format('M j, Y') }}</span>
+</div>
+
+{{-- Recipe Info --}}
+@if(
+    $post->prep_time ||
+    $post->cook_time ||
+    $post->servings ||
+    $post->calories ||
+    $post->protein
+)
+
+    <div class="pm-latest-recipe-info">
+
+        @if($post->prep_time || $post->cook_time)
+            <span>
+                ⏱
+                {{ ($post->prep_time ?? 0) + ($post->cook_time ?? 0) }} min
+            </span>
+        @endif
+
+        @if($post->protein)
+            <span>
+                💪
+                {{ rtrim(rtrim(number_format($post->protein, 2, '.', ''), '0'), '.') }}g protein
+            </span>
+        @endif
+
+        @if($post->calories)
+            <span>
+                🔥
+                {{ $post->calories }} kcal
+            </span>
+        @endif
+
+    </div>
+
+@endif
 
                     </a>
                 @endforeach
