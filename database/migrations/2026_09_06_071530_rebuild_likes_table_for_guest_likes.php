@@ -8,29 +8,33 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Rebuild likes table to support both
+        // registered users and guests.
+        Schema::dropIfExists('likes');
+
         Schema::create('likes', function (Blueprint $table) {
             $table->id();
 
-            // Registered users
+            // Registered user
             $table->foreignId('user_id')
                 ->nullable()
                 ->constrained()
                 ->onDelete('cascade');
 
-            // Guests are identified by a secure cookie token
+            // Guest browser/device identifier
             $table->string('guest_token', 64)->nullable();
 
-            // The liked recipe
+            // Liked post
             $table->foreignId('post_id')
                 ->constrained()
                 ->onDelete('cascade');
 
             $table->timestamps();
 
-            // A registered user can like a post only once
+            // One like per registered user per post
             $table->unique(['user_id', 'post_id']);
 
-            // A guest can like a post only once per browser/device token
+            // One like per guest token per post
             $table->unique(['guest_token', 'post_id']);
         });
     }
@@ -38,5 +42,22 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('likes');
+
+        // Restore the original likes structure
+        Schema::create('likes', function (Blueprint $table) {
+            $table->id();
+
+            $table->foreignId('user_id')
+                ->constrained()
+                ->onDelete('cascade');
+
+            $table->foreignId('post_id')
+                ->constrained()
+                ->onDelete('cascade');
+
+            $table->timestamps();
+
+            $table->unique(['user_id', 'post_id']);
+        });
     }
 };

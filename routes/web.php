@@ -15,30 +15,35 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 | PUBLIC ROUTES
 |--------------------------------------------------------------------------
-| These pages are accessible without an account.
 */
-
 
 // Home
 Route::get('/', [PostController::class, 'home']);
 
 
-// Public recipes
+// Public recipes list
 Route::get('/posts', [PostController::class, 'index'])
     ->name('posts.index');
 
-Route::get('/posts/{post}', [PostController::class, 'show'])
-    ->name('posts.show');
 
-
-// Public users
-Route::get('/users/{user}', [UserController::class, 'show'])
-    ->name('users.show');
+// Search suggestions
+Route::get('/search/suggestions', [PostController::class, 'suggestions'])
+    ->name('search.suggestions');
 
 
 // RSS
 Route::get('/rss', [PostController::class, 'rss'])
     ->name('posts.rss');
+
+
+// About
+Route::view('/about', 'about')
+    ->name('about');
+
+
+// Public users
+Route::get('/users/{user}', [UserController::class, 'show'])
+    ->name('users.show');
 
 
 // Public tags
@@ -51,27 +56,14 @@ Route::get('/collections/{collection:slug}', [CollectionController::class, 'show
     ->name('collections.show');
 
 
-// About
-Route::view('/about', 'about')
-    ->name('about');
-
-
-// Search suggestions
-Route::get('/search/suggestions', [PostController::class, 'suggestions'])
-    ->name('search.suggestions');
-
-
 
 /*
 |--------------------------------------------------------------------------
-| AUTHENTICATED + VERIFIED USER ROUTES
+| AUTHENTICATED USER ROUTES
 |--------------------------------------------------------------------------
-| These actions require the user to be logged in AND
-| have a verified email address.
 */
 
-
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
@@ -102,36 +94,55 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Create / Edit / Delete Recipes
+    | Create Recipe
     |--------------------------------------------------------------------------
     */
 
+    // IMPORTANT: this must be before /posts/{post}
     Route::get('/posts/create', [PostController::class, 'create'])
         ->name('posts.create');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Store Recipe
+    |--------------------------------------------------------------------------
+    */
 
     Route::post('/posts', [PostController::class, 'store'])
         ->name('posts.store');
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Edit Recipe
+    |--------------------------------------------------------------------------
+    */
+
     Route::get('/posts/{post}/edit', [PostController::class, 'edit'])
         ->name('posts.edit');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Update Recipe
+    |--------------------------------------------------------------------------
+    */
 
     Route::put('/posts/{post}', [PostController::class, 'update'])
         ->name('posts.update');
 
     Route::patch('/posts/{post}', [PostController::class, 'update']);
 
-    Route::delete('/posts/{post}', [PostController::class, 'destroy'])
-        ->name('posts.destroy');
-
 
     /*
     |--------------------------------------------------------------------------
-    | Likes
+    | Delete Recipe
     |--------------------------------------------------------------------------
     */
 
-    Route::post('/posts/{post}/like', [LikeController::class, 'toggle'])
-        ->name('posts.like');
+    Route::delete('/posts/{post}', [PostController::class, 'destroy'])
+        ->name('posts.destroy');
 
 
     /*
@@ -145,15 +156,31 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])
         ->name('comments.destroy');
-
 });
+
+
+
+/*
+|--------------------------------------------------------------------------
+| PUBLIC POST ROUTES
+|--------------------------------------------------------------------------
+*/
+
+// Public likes
+Route::post('/posts/{post}/like', [LikeController::class, 'toggle'])
+    ->name('posts.like');
+
+
+// IMPORTANT:
+// This dynamic route MUST come AFTER /posts/create
+Route::get('/posts/{post}', [PostController::class, 'show'])
+    ->name('posts.show');
+
 
 
 /*
 |--------------------------------------------------------------------------
 | AUTH ROUTES
-|--------------------------------------------------------------------------
-| Login, Register, Password Reset, Email Verification, Logout...
 |--------------------------------------------------------------------------
 */
 
@@ -165,10 +192,8 @@ require __DIR__.'/auth.php';
 |--------------------------------------------------------------------------
 | LANDING PAGES
 |--------------------------------------------------------------------------
-| Keep this route at the very bottom because it contains
-| a dynamic slug.
-|--------------------------------------------------------------------------
 */
 
+// Keep this at the very bottom because it contains a dynamic slug.
 Route::get('/{landingPage:slug}', [LandingPageController::class, 'show'])
     ->name('landing-pages.show');

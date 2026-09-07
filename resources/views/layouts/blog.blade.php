@@ -99,29 +99,29 @@
                 </a>
 
 
-                {{-- HIGH PROTEIN (placeholder - landing page not built yet) --}}
-<a
-    href="#"
-    class="pm-nav-link"
->
-<svg viewBox="0 0 24 24" aria-hidden="true">
-    <path d="M4 10v4"/>
-    <path d="M2.5 9v6"/>
-    <path d="M20 10v4"/>
-    <path d="M21.5 9v6"/>
-    <rect x="5" y="8" width="2.5" height="8" rx="1"/>
-    <rect x="16.5" y="8" width="2.5" height="8" rx="1"/>
-    <line x1="7.5" y1="12" x2="16.5" y2="12" stroke-width="2.4"/>
-</svg>
+          {{-- HIGH PROTEIN (placeholder - landing page not built yet) --}}
+                <a
+                    href="{{ route('landing-pages.show', ['landingPage' => 'high-protein']) }}"
+                    class="pm-nav-link {{ request()->is('high-protein') ? 'pm-active' : '' }}"
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 10v4"/>
+                        <path d="M2.5 9v6"/>
+                        <path d="M20 10v4"/>
+                        <path d="M21.5 9v6"/>
+                        <rect x="5" y="8" width="2.5" height="8" rx="1"/>
+                        <rect x="16.5" y="8" width="2.5" height="8" rx="1"/>
+                        <line x1="7.5" y1="12" x2="16.5" y2="12" stroke-width="2.4"/>
+                    </svg>
 
-    <span>High Protein</span>
-</a>
+                    <span>High Protein</span>
+                </a>
 
 
                 {{-- QUICK & EASY (placeholder - landing page not built yet) --}}
                 <a
-                    href="#"
-                    class="pm-nav-link"
+                   href="{{ route('landing-pages.show', ['landingPage' => 'quick-easy']) }}"
+                   class="pm-nav-link {{ request()->is('quick-easy') ? 'pm-active' : '' }}"
                 >
                     <svg viewBox="0 0 24 24" aria-hidden="true">
                         <path d="m13.2 3.8-6 8h5.1l-1.5 8.4 6-9h-5z"/>
@@ -131,17 +131,17 @@
                 </a>
 
                 {{-- MEAL PREP --}}
-<a
-                    href="#"
-                    class="pm-nav-link"
->
-<svg viewBox="0 0 24 24" aria-hidden="true">
-    <path d="M8 3h8v3H8z"/>
-    <path d="M7 6h10v13a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2z"/>
-    <path d="M7 13h10"/>
-</svg>
+                <a
+                    href="{{ route('landing-pages.show', ['landingPage' => 'meal-prep']) }}"
+                    class="pm-nav-link {{ request()->is('meal-prep') ? 'pm-active' : '' }}"
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M8 3h8v3H8z"/>
+                        <path d="M7 6h10v13a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2z"/>
+                        <path d="M7 13h10"/>
+                    </svg>
 
-                      <span>Meal Prep</span>
+                    <span>Meal Prep</span>
                 </a>
                 {{-- ABOUT --}}
                 <a
@@ -472,27 +472,27 @@
 
             {{-- HIGH PROTEIN (placeholder) --}}
             <a
-            href="#"
+            href="{{ route('landing-pages.show', ['landingPage' => 'high-protein']) }}"
             @click="mobileOpen = false"
->
+          >
               <span>High Protein</span>
            </a>
 
 
             {{-- QUICK & EASY (placeholder) --}}
             <a
-                href="#"
+                href="{{ route('landing-pages.show', ['landingPage' => 'quick-easy']) }}"
                 @click="mobileOpen = false"
             >
                 <span>Quick &amp; Easy</span>
             </a>
-            {{-- HEALTHY & BALANCED (placeholder) --}}
-<a
-    href="#"
-    @click="mobileOpen = false"
->
-    <span>Healthy &amp; Balanced</span>
-</a>
+            {{-- MEAL PREP --}}
+            <a
+                href="{{ route('landing-pages.show', ['landingPage' => 'meal-prep']) }}"
+                @click="mobileOpen = false"
+            >
+                <span>Meal Prep</span>
+            </a>
 
             {{-- ABOUT --}}
             <a
@@ -502,19 +502,9 @@
             >
                 <span>About</span>
             </a>
+           
 
-
-            {{-- SEARCH --}}
-            <form action="{{ route('posts.index') }}" method="GET" class="pm-mobile-search">
-                <input
-                    type="search"
-                    name="q"
-                    placeholder="Search recipes..."
-                    aria-label="Search recipes"
-                    @keydown.enter="mobileOpen = false"
-                />
-                <button type="submit" aria-label="Submit search">Search</button>
-            </form>
+        
 
 
             {{-- =================================================

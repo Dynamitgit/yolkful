@@ -4,16 +4,6 @@
 @section('description', 'Simple, delicious, high-protein breakfast recipes for real mornings.')
 
 @section('content')
-    @php
-        $categories = [
-            ['Protein Pancakes', 'Fluffy, delicious & protein-packed.', 'https://images.unsplash.com/photo-1528207776546-365bb710ee93?auto=format&fit=crop&w=500&q=85'],
-            ['Protein Oatmeal', 'Warm, cosy & packed with protein.', 'https://images.unsplash.com/photo-1517673400267-0251440c45dc?auto=format&fit=crop&w=500&q=85'],
-            ['Protein Smoothies', 'Quick, fresh & nourishing.', 'https://images.unsplash.com/photo-1553530666-ba11a90a0868?auto=format&fit=crop&w=500&q=85'],
-            ['Protein Bowls', 'Balanced bowls to power your morning.', 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=500&q=85'],
-            ['Protein Muffins', 'Perfect for busy mornings.', 'https://images.unsplash.com/photo-1607958996333-41aef7caefaa?auto=format&fit=crop&w=500&q=85'],
-            ['Egg Breakfasts', 'Simple, classic & high in protein.', 'https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=500&q=85'],
-        ];
-    @endphp
 
   <section class="pm-hero">
 
@@ -73,8 +63,8 @@
         </span>
 
         <span>
-            <strong>Healthy &amp; Balanced</strong>
-            <small>Wholesome ingredients, satisfying flavors</small>
+            <strong>Meal Prep</strong>
+            <small>Breakfasts you can make ahead and enjoy all week</small>
         </span>
     </div>
 
@@ -83,9 +73,156 @@
 
 </section>
 
-    <section class="pm-section" id="recipes"><div class="pm-shell"><header class="pm-section-head"><p>Find your favourite</p><h2>Browse by Category</h2></header><div class="pm-categories">@foreach($categories as [$name, $description, $image])<a class="pm-category" href="{{ route('posts.index') }}"><img src="{{ $image }}" alt="{{ $name }}"><div class="pm-category-text"><h3>{{ $name }}</h3><p>{{ $description }}</p><span class="pm-explore">Explore →</span></div></a>@endforeach</div></div></section>
+<section class="pm-section" id="recipes"><div class="pm-shell"><header class="pm-section-head pm-section-head-featured"><span class="pm-kicker-badge">Seven Ways to Wake Up</span><h2 class="pm-featured-title">The Full <span class="pm-title-highlight">Spread<svg class="pm-squiggle" viewBox="0 0 140 14" preserveAspectRatio="none" aria-hidden="true"><path d="M2 8c15-9 25 4 40-3s25 6 38-1 25 5 38-2 15 3 20-1" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg></span></h2></header><div class="pm-categories">@foreach($categories as $category)<a class="pm-category" href="{{ route('posts.index', ['category' => $category->slug]) }}"><img src="{{ asset('images/categories/'.$category->slug.'.jpg') }}" alt="{{ $category->name }}"><div class="pm-category-text"><h3>{{ $category->name }}</h3>@if($category->posts_count > 0)<p>{{ $category->posts_count }} {{ Str::plural('recipe', $category->posts_count) }}</p>@else<p style="visibility:hidden">placeholder</p>@endif<span class="pm-explore">Explore →</span></div></a>@endforeach</div></div></section>
+<section class="pm-section pm-latest-section">
+    <div class="pm-shell">
 
-    <section class="pm-section pm-section-soft"><div class="pm-shell pm-split"><aside class="pm-why"><p class="pm-kicker">Why protein in the morning?</p><h2>Start Your Day Strong</h2><p>A high-protein breakfast helps you stay full longer, supports muscle growth, boosts energy, and keeps you focused throughout the day.</p><div class="pm-why-list"><span><b>⌁</b>Build<br>Muscle</span><span><b>◷</b>Stay Full<br>Longer</span><span><b>ϟ</b>Boost<br>Energy</span><span><b>✓</b>Support<br>Your Goals</span></div><a class="pm-button" href="{{ route('posts.index') }}">Learn more about protein</a></aside><div class="pm-popular"><header class="pm-popular-heading"><h2>Popular This Week</h2><a href="{{ route('posts.index') }}">View all recipes →</a></header><div class="pm-recipes">@forelse($popularPosts as $post)<a class="pm-recipe" href="{{ route('posts.show', $post) }}"><div class="pm-recipe-photo">@if($post->image)<img src="{{ asset('storage/' . $post->image) }}" alt="{{ $post->title }}">@else<img src="https://images.unsplash.com/photo-1528207776546-365bb710ee93?auto=format&fit=crop&w=600&q=85" alt="Protein breakfast">@endif<span class="pm-time">{{ $loop->iteration * 10 + 5 }} MIN</span></div><div class="pm-recipe-body"><h3>{{ $post->title }}</h3><p>{{ $post->category->name ?? 'High protein' }} • Easy</p><div class="pm-stars">★★★★★ <small>({{ $post->views }})</small></div></div></a>@empty @foreach(array_slice($categories, 0, 3) as [$name, $description, $image])<a class="pm-recipe" href="{{ route('posts.index') }}"><div class="pm-recipe-photo"><img src="{{ $image }}" alt="{{ $name }}"><span class="pm-time">15 MIN</span></div><div class="pm-recipe-body"><h3>{{ $name }}</h3><p>30g protein • Easy</p><div class="pm-stars">★★★★★ <small>(128)</small></div></div></a>@endforeach @endforelse</div></div></div></section>
+        <header class="pm-section-head pm-latest-heading">
+            <span class="pm-kicker-badge">What's New</span>
+            <h2 class="pm-featured-title">Fresh Breakfast Ideas</h2>
+        </header>
 
-    <section class="pm-section"><div class="pm-shell"><div class="pm-newsletter"><div class="pm-newsletter-icon">✉</div><div><h2>Get New Recipes in Your Inbox</h2><p>Join our community and get easy, high-protein breakfast recipes sent to you every week!</p></div><form class="pm-subscribe" onsubmit="event.preventDefault()"><input type="email" aria-label="Email address" placeholder="Your email address"><button class="pm-button" type="submit">Subscribe</button></form></div></div></section>
+        @if($latestPosts->count())
+            <div class="pm-latest-grid">
+                @foreach($latestPosts as $post)
+                    <a class="pm-latest-card" href="{{ route('posts.show', $post) }}">
+
+                        <div class="pm-latest-photo">
+                            @if($post->image)
+                                <img
+                                    src="{{ asset('storage/' . $post->image) }}"
+                                    alt="{{ $post->title }}"
+                                    loading="lazy"
+                                >
+                            @else
+                                <div class="pm-latest-placeholder" aria-hidden="true">
+                                    <span>Yolkful</span>
+                                </div>
+                            @endif
+
+                            <span class="pm-latest-favorite" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <path
+                                        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78Z"
+                                        stroke="currentColor"
+                                        stroke-width="1.8"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    />
+                                </svg>
+                            </span>
+                        </div>
+
+                        <div class="pm-latest-body">
+                            <h3>{{ $post->title }}</h3>
+
+                            <div class="pm-latest-meta">
+                                <span>{{ $post->category->name ?? 'Breakfast' }}</span>
+                                <span class="pm-meta-dot">•</span>
+                                <span>{{ $post->created_at->format('M j, Y') }}</span>
+                            </div>
+                        </div>
+
+                    </a>
+                @endforeach
+            </div>
+
+            <div class="pm-latest-cta">
+                <a href="{{ route('posts.index') }}">
+                    See All Recipes <span aria-hidden="true">→</span>
+                </a>
+            </div>
+        @else
+            <p class="pm-latest-empty">No recipes published yet.</p>
+        @endif
+
+    </div>
+</section>   
+<section class="pm-section pm-section-soft">
+    <div class="pm-shell pm-split">
+
+        <aside class="pm-why">
+            <p class="pm-kicker">Why protein in the morning?</p>
+
+            <h2>Start Your Day Strong</h2>
+
+            <p>
+                A high-protein breakfast helps you stay full longer, supports muscle growth,
+                boosts energy, and keeps you focused throughout the day.
+            </p>
+
+            <div class="pm-why-list">
+                <span><b>⌁</b>Build<br>Muscle</span>
+                <span><b>◷</b>Stay Full<br>Longer</span>
+                <span><b>ϟ</b>Boost<br>Energy</span>
+                <span><b>✓</b>Support<br>Your Goals</span>
+            </div>
+
+            <a class="pm-button" href="{{ route('posts.index') }}">
+                Learn more about protein
+            </a>
+        </aside>
+
+        <div class="pm-popular">
+
+            <header class="pm-popular-heading">
+                <h2>Popular This Week</h2>
+                <a href="{{ route('posts.index') }}">View all recipes →</a>
+            </header>
+
+            <div class="pm-recipes">
+
+                @forelse($popularPosts as $post)
+
+                    <a class="pm-recipe" href="{{ route('posts.show', $post) }}">
+
+                        <div class="pm-recipe-photo">
+
+                            @if($post->image)
+                                <img
+                                    src="{{ asset('storage/' . $post->image) }}"
+                                    alt="{{ $post->title }}"
+                                >
+                            @else
+                                <div class="pm-recipe-placeholder" aria-hidden="true">
+                                    <span>Yolkful</span>
+                                </div>
+                            @endif
+
+                            <span class="pm-time">
+                                {{ $loop->iteration * 10 + 5 }} MIN
+                            </span>
+
+                        </div>
+
+                        <div class="pm-recipe-body">
+                            <h3>{{ $post->title }}</h3>
+
+                            <p>
+                                {{ $post->category->name ?? 'High protein' }} • Easy
+                            </p>
+
+                            <div class="pm-stars">
+                                ★★★★★
+                                <small>({{ $post->views }})</small>
+                            </div>
+                        </div>
+
+                    </a>
+
+                @empty
+
+                    <p style="color:#5f675e; padding: 20px 0;">
+                        No popular recipes yet — check back soon!
+                    </p>
+
+                @endforelse
+
+            </div>
+        </div>
+
+    </div>
+</section>
+
+   <section class="pm-section"><div class="pm-shell"><div class="pm-newsletter"><div class="pm-newsletter-icon">✉</div><div><h2>Get New Recipes in Your Inbox</h2><p>Join our community and get easy, high-protein breakfast recipes sent to you every week!</p></div><form class="pm-subscribe" onsubmit="event.preventDefault()"><input type="email" aria-label="Email address" placeholder="Your email address"><button class="pm-button" type="submit">Subscribe</button></form></div></div></section>
 @endsection

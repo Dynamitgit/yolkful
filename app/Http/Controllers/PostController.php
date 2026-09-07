@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+
 use App\Models\Post;
 use App\Models\Category;
 use App\Models\Tag;
 use App\Models\Collection;
-use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
@@ -16,28 +19,75 @@ class PostController extends Controller
      */
     public function home()
     {
-        $latestPosts = Post::where('status', 'published')->latest()->take(6)->get();
-        $popularPosts = Post::where('status', 'published')->orderByDesc('views')->take(3)->get();
+        $latestPosts = Post::with('category')
+            ->where('status', 'published')
+            ->latest()
+            ->take(6)
+            ->get();
 
-        return view('home', compact('latestPosts', 'popularPosts'));
+        $popularPosts = Post::with('category')
+            ->where('status', 'published')
+            ->orderByDesc('views')
+            ->take(3)
+            ->get();
+
+        $categories = Category::withCount([
+            'posts' => function ($query) {
+                $query->where('status', 'published');
+            }
+        ])->get();
+
+        return view('home', compact(
+            'latestPosts',
+            'popularPosts',
+            'categories'
+        ));
     }
 
+
     /**
-     * Display a listing of the resource.
+     * Display a listing of published posts.
      */
     public function index(Request $request)
     {
-        $query = Post::where('status', 'published');
+        $query = Post::with([
+            'category',
+            'user',
+            'tags',
+        ])->where('status', 'published');
+
         if ($request->filled('q')) {
             $search = $request->q;
+
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('content', 'like', "%{$search}%");
+                    ->orWhere('content', 'like', "%{$search}%");
             });
         }
-        $posts = $query->latest()->paginate(10)->withQueryString();
-        return view('posts.index', compact('posts'));
+
+        if ($request->filled('category')) {
+            $query->whereHas('category', function ($q) use ($request) {
+                $q->where('slug', $request->category);
+            });
+        }
+
+        $posts = $query
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        $categories = Category::withCount([
+            'posts' => function ($query) {
+                $query->where('status', 'published');
+            }
+        ])->get();
+
+        return view('posts.index', compact(
+            'posts',
+            'categories'
+        ));
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -47,8 +97,14 @@ class PostController extends Controller
         $categories = Category::all();
         $tags = Tag::all();
         $collections = Collection::all();
-        return view('posts.create', compact('categories', 'tags', 'collections'));
+
+        return view('posts.create', compact(
+            'categories',
+            'tags',
+            'collections'
+        ));
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -56,49 +112,183 @@ class PostController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title' => 'required|max:255',
-            'content' => 'required',
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
             'category_id' => 'required|exists:categories,id',
             'collection_id' => 'nullable|exists:collections,id',
             'status' => 'required|in:draft,published',
             'image' => 'nullable|image|max:2048',
+
+            'tags' => 'nullable|array',
+            'tags.*' => 'exists:tags,id',
         ]);
-        $validated['slug'] = Str::slug($request->title);
-        $validated['user_id'] = auth()->id();
-        if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('posts', 'public');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Generate a unique slug
+        |--------------------------------------------------------------------------
+        */
+
+        $baseSlug = Str::slug($validated['title']);
+        $slug = $baseSlug;
+        $counter = 2;
+
+        while (Post::where('slug', $slug)->exists()) {
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
         }
+
+        $validated['slug'] = $slug;
+        $validated['user_id'] = auth()->id();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Store image
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->hasFile('image')) {
+            $validated['image'] = $request
+                ->file('image')
+                ->store('posts', 'public');
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Create post
+        |--------------------------------------------------------------------------
+        */
 
         $post = Post::create($validated);
 
-        if ($request->has('tags')) {
-            $post->tags()->attach($request->tags);
+        /*
+        |--------------------------------------------------------------------------
+        | Attach tags
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->filled('tags')) {
+            $post->tags()->sync($request->tags);
         }
 
-        return redirect()->route('posts.index')->with('success', 'Post created successfully!');
+        return redirect()
+            ->route('posts.index')
+            ->with('success', 'Post created successfully!');
     }
+
 
     /**
      * Display the specified resource.
      */
     public function show(Post $post)
     {
-        if ($post->status === 'draft' && auth()->id() !== $post->user_id) {
+        /*
+        |--------------------------------------------------------------------------
+        | Draft protection
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $post->status === 'draft' &&
+            auth()->id() !== $post->user_id
+        ) {
             abort(404);
         }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Increment views
+        |--------------------------------------------------------------------------
+        */
 
         if ($post->status === 'published') {
             $post->increment('views');
         }
 
-        $relatedPosts = Post::where('category_id', $post->category_id)
-            ->where('status', 'published')
-            ->where('id', '!=', $post->id)
-            ->take(3)
-            ->get();
 
-        return view('posts.show', compact('post', 'relatedPosts'));
+        /*
+        |--------------------------------------------------------------------------
+        | Load relationships
+        |--------------------------------------------------------------------------
+        */
+
+        $post->load([
+            'category',
+            'user',
+            'tags',
+            'comments.user',
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Like count
+        |--------------------------------------------------------------------------
+        */
+
+        $likeCount = DB::table('likes')
+            ->where('post_id', $post->id)
+            ->count();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Check if current visitor already liked
+        |--------------------------------------------------------------------------
+        */
+
+        if (auth()->check()) {
+
+            // Registered user
+            $hasLiked = DB::table('likes')
+                ->where('post_id', $post->id)
+                ->where('user_id', auth()->id())
+                ->exists();
+
+        } else {
+
+            // Guest
+            $guestToken = request()->cookie('yolkful_guest_token');
+
+            $hasLiked = false;
+
+            if ($guestToken) {
+                $hasLiked = DB::table('likes')
+                    ->where('post_id', $post->id)
+                    ->where('guest_token', $guestToken)
+                    ->exists();
+            }
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Related posts
+        |--------------------------------------------------------------------------
+        */
+
+        $relatedPosts = collect();
+
+        if ($post->category_id) {
+            $relatedPosts = Post::query()
+                ->where('category_id', $post->category_id)
+                ->where('status', 'published')
+                ->where('id', '!=', $post->id)
+                ->latest()
+                ->take(3)
+                ->get();
+        }
+
+
+        return view('posts.show', compact(
+            'post',
+            'relatedPosts',
+            'likeCount',
+            'hasLiked'
+        ));
     }
+
 
     /**
      * Show the form for editing the specified resource.
@@ -112,8 +302,15 @@ class PostController extends Controller
         $categories = Category::all();
         $tags = Tag::all();
         $collections = Collection::all();
-        return view('posts.edit', compact('post', 'categories', 'tags', 'collections'));
+
+        return view('posts.edit', compact(
+            'post',
+            'categories',
+            'tags',
+            'collections'
+        ));
     }
+
 
     /**
      * Update the specified resource in storage.
@@ -125,30 +322,89 @@ class PostController extends Controller
         }
 
         $validated = $request->validate([
-            'title' => 'required|max:255',
-            'content' => 'required',
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
             'category_id' => 'required|exists:categories,id',
             'collection_id' => 'nullable|exists:collections,id',
             'status' => 'required|in:draft,published',
             'image' => 'nullable|image|max:2048',
+
+            'tags' => 'nullable|array',
+            'tags.*' => 'exists:tags,id',
         ]);
-        $validated['slug'] = Str::slug($request->title);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Generate a unique slug
+        |--------------------------------------------------------------------------
+        */
+
+        $baseSlug = Str::slug($validated['title']);
+
+        $slug = $baseSlug;
+        $counter = 2;
+
+        while (
+            Post::where('slug', $slug)
+                ->where('id', '!=', $post->id)
+                ->exists()
+        ) {
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+
+        $validated['slug'] = $slug;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Replace image
+        |--------------------------------------------------------------------------
+        */
+
         if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('posts', 'public');
+
+            // Delete old image
+            if ($post->image) {
+                Storage::disk('public')->delete($post->image);
+            }
+
+            // Store new image
+            $validated['image'] = $request
+                ->file('image')
+                ->store('posts', 'public');
+
         } else {
+
+            // Keep current image
             unset($validated['image']);
         }
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Update post
+        |--------------------------------------------------------------------------
+        */
+
         $post->update($validated);
 
-        if ($request->has('tags')) {
-            $post->tags()->sync($request->tags);
-        } else {
-            $post->tags()->sync([]);
-        }
 
-        return redirect()->route('posts.index')->with('success', 'Post updated successfully!');
+        /*
+        |--------------------------------------------------------------------------
+        | Sync tags
+        |--------------------------------------------------------------------------
+        */
+
+        $post->tags()->sync($request->input('tags', []));
+
+
+        return redirect()
+            ->route('posts.index')
+            ->with('success', 'Post updated successfully!');
     }
+
 
     /**
      * Remove the specified resource from storage.
@@ -159,11 +415,31 @@ class PostController extends Controller
             abort(403, 'You are not authorized to delete this post.');
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | Delete image
+        |--------------------------------------------------------------------------
+        */
+
+        if ($post->image) {
+            Storage::disk('public')->delete($post->image);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Delete post
+        |--------------------------------------------------------------------------
+        */
+
         $post->delete();
-        return redirect()->route('posts.index')->with('success', 'Post deleted successfully!');
+
+        return redirect()
+            ->route('posts.index')
+            ->with('success', 'Post deleted successfully!');
     }
 
-     /**
+
+    /**
      * Return live search suggestions as JSON.
      */
     public function suggestions(Request $request)
@@ -178,29 +454,42 @@ class PostController extends Controller
             ->where('title', 'like', "%{$query}%")
             ->latest()
             ->take(5)
-            ->get(['id', 'title', 'image']);
+            ->get([
+                'id',
+                'title',
+                'image',
+            ]);
 
-        return response()->json($posts->map(function ($post) {
-            return [
-                'id' => $post->id,
-                'title' => $post->title,
-                'url' => route('posts.show', $post->id),
-                'image' => $post->image ? asset('storage/' . $post->image) : null,
-            ];
-        }));
+        return response()->json(
+            $posts->map(function ($post) {
+                return [
+                    'id' => $post->id,
+                    'title' => $post->title,
+                    'url' => route('posts.show', $post->id),
+                    'image' => $post->image
+                        ? asset('storage/' . $post->image)
+                        : null,
+                ];
+            })
+        );
     }
+
 
     /**
      * RSS feed of latest published posts.
      */
     public function rss()
     {
-        $posts = Post::where('status', 'published')->latest()->take(20)->get();
+        $posts = Post::where('status', 'published')
+            ->latest()
+            ->take(20)
+            ->get();
 
-        return response()->view('posts.rss', compact('posts'))
-            ->header('Content-Type', 'application/rss+xml; charset=UTF-8');
+        return response()
+            ->view('posts.rss', compact('posts'))
+            ->header(
+                'Content-Type',
+                'application/rss+xml; charset=UTF-8'
+            );
     }
-
-   
-
 }

@@ -9,15 +9,22 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
-        Schema::create('post_tag', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('post_id')->constrained()->onDelete('cascade');
-            $table->foreignId('tag_id')->constrained()->onDelete('cascade');
-            
-        });
-    }
+   public function up(): void
+{
+    Schema::create('post_tag', function (Blueprint $table) {
+        $table->id();
+
+        $table->foreignId('post_id')
+            ->constrained()
+            ->onDelete('cascade');
+
+        $table->foreignId('tag_id')
+            ->constrained()
+            ->onDelete('cascade');
+
+        $table->unique(['post_id', 'tag_id']);
+    });
+}
 
     /**
      * Reverse the migrations.
