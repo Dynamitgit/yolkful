@@ -86,56 +86,39 @@
             <div class="pm-latest-grid">
                 @foreach($latestPosts as $post)
                     <a class="pm-latest-card" href="{{ route('posts.show', $post) }}">
-
                         <div class="pm-latest-photo">
-                            @if($post->image)
-                                <img
-                                    src="{{ asset('storage/' . $post->image) }}"
-                                    alt="{{ $post->title }}"
-                                    loading="lazy"
-                                >
-                            @else
-                                <div class="pm-latest-placeholder" aria-hidden="true">
-                                    <span>Yolkful</span>
-                                </div>
-                            @endif
 
-                            <span class="pm-latest-favorite" aria-hidden="true">
-                                <svg viewBox="0 0 24 24" fill="none">
-                                    <path
-                                        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78Z"
-                                        stroke="currentColor"
-                                        stroke-width="1.8"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                    />
-                                </svg>
-                            </span>
-                        </div>
+    @if($post->image)
+        <img
+            src="{{ asset('storage/' . $post->image) }}"
+            alt="{{ $post->title }}"
+            loading="lazy"
+        >
+    @else
+        <div class="pm-latest-placeholder">
+            <span>Yolkful</span>
+        </div>
+    @endif
 
-                        <div class="pm-latest-body">
-                            <h3>{{ $post->title }}</h3>
+    <span class="pm-latest-favorite">
+        ...
+    </span>
 
-                           <div class="pm-latest-meta">
-    <span>{{ $post->category->name ?? 'Breakfast' }}</span>
-    <span class="pm-meta-dot">•</span>
-    <span>{{ $post->created_at->format('M j, Y') }}</span>
 </div>
 
-{{-- Recipe Info --}}
+
+{{-- هنا خاص Recipe Info يكون --}}
 @if(
     $post->prep_time ||
     $post->cook_time ||
-    $post->servings ||
-    $post->calories ||
-    $post->protein
+    $post->protein ||
+    $post->servings
 )
-
     <div class="pm-latest-recipe-info">
 
         @if($post->prep_time || $post->cook_time)
             <span>
-                ⏱
+                ⏱️
                 {{ ($post->prep_time ?? 0) + ($post->cook_time ?? 0) }} min
             </span>
         @endif
@@ -147,18 +130,19 @@
             </span>
         @endif
 
-        @if($post->calories)
+        @if($post->servings)
             <span>
-                🔥
-                {{ $post->calories }} kcal
+                🍽️
+                {{ $post->servings }} servings
             </span>
         @endif
 
     </div>
-
 @endif
 
-                    </a>
+
+</a>
+                        
                 @endforeach
             </div>
 

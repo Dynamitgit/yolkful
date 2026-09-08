@@ -118,6 +118,124 @@
                     @endforeach
                 </select>
             </div>
+                        {{-- Recipe Information --}}
+            <div class="mb-6 p-5 rounded-xl border border-gold-100 bg-gold-50/30">
+
+                <h2 class="font-serif text-xl font-bold text-gray-800 mb-4">
+                    🍳 Recipe Information
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                    {{-- Prep Time --}}
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-2">
+                            Prep Time (minutes)
+                        </label>
+
+                        <input
+                            type="number"
+                            name="prep_time"
+                            min="0"
+                            value="{{ old('prep_time', $post->prep_time) }}"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2"
+                        >
+                    </div>
+
+                    {{-- Cook Time --}}
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-2">
+                            Cook Time (minutes)
+                        </label>
+
+                        <input
+                            type="number"
+                            name="cook_time"
+                            min="0"
+                            value="{{ old('cook_time', $post->cook_time) }}"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2"
+                        >
+                    </div>
+
+                    {{-- Servings --}}
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-2">
+                            Servings
+                        </label>
+
+                        <input
+                            type="number"
+                            name="servings"
+                            min="1"
+                            value="{{ old('servings', $post->servings) }}"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2"
+                        >
+                    </div>
+
+                    {{-- Protein --}}
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-2">
+                            Protein (g)
+                        </label>
+
+                        <input
+                            type="number"
+                            name="protein"
+                            min="0"
+                            step="0.01"
+                            value="{{ old('protein', $post->protein) }}"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2"
+                        >
+                    </div>
+
+                    {{-- Calories --}}
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-2">
+                            Calories (kcal)
+                        </label>
+
+                        <input
+                            type="number"
+                            name="calories"
+                            min="0"
+                            value="{{ old('calories', $post->calories) }}"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2"
+                        >
+                    </div>
+
+                </div>
+
+
+                {{-- Ingredients --}}
+                <div class="mt-4">
+                    <label class="block text-gray-700 font-semibold mb-2">
+                        Ingredients
+                    </label>
+
+                    <textarea
+                        name="ingredients_text"
+                        rows="6"
+                        placeholder="One ingredient per line"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2"
+                    >{{ old('ingredients_text', is_array($post->ingredients) ? implode("\n", $post->ingredients) : '') }}</textarea>
+                </div>
+
+
+                {{-- Instructions --}}
+                <div class="mt-4">
+                    <label class="block text-gray-700 font-semibold mb-2">
+                        Instructions
+                    </label>
+
+                    <textarea
+                        name="instructions_text"
+                        rows="6"
+                        placeholder="One step per line"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2"
+                    >{{ old('instructions_text', is_array($post->instructions) ? implode("\n", $post->instructions) : '') }}</textarea>
+                </div>
+
+            </div>
 
             {{-- Content --}}
             <div class="mb-4">

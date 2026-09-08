@@ -100,123 +100,89 @@
 
                 </div>
 
-
                 {{-- Recipe Stats --}}
-                @if(
-                    $post->prep_time ||
-                    $post->cook_time ||
-                    $post->servings ||
-                    $post->calories ||
-                    $post->protein
-                )
+@if(
+    $post->prep_time ||
+    $post->cook_time ||
+    $post->servings ||
+    $post->protein
+)
 
-                    <div class="grid grid-cols-2 md:grid-cols-5 gap-px bg-gold-100">
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-px bg-gold-100">
 
-                        {{-- Prep Time --}}
-                        @if($post->prep_time)
-                            <div class="bg-white p-4 text-center">
-                                <div class="text-xl mb-1">⏱️</div>
+        {{-- Total Time --}}
+        @if($post->prep_time || $post->cook_time)
+            <div class="bg-white p-4 text-center">
 
-                                <div class="text-xs uppercase tracking-wide text-gray-400">
-                                    Prep Time
-                                </div>
+                <div class="text-xl mb-1">⏱️</div>
 
-                                <div class="font-semibold text-gray-800 mt-1">
-                                    {{ $post->prep_time }} min
-                                </div>
-                            </div>
-                        @endif
+                <div class="text-xs uppercase tracking-wide text-gray-400">
+                    Total Time
+                </div>
 
+                <div class="font-semibold text-gray-800 mt-1">
+                    {{ ($post->prep_time ?? 0) + ($post->cook_time ?? 0) }} min total
+                </div>
 
-                        {{-- Cook Time --}}
-                        @if($post->cook_time)
-                            <div class="bg-white p-4 text-center">
-                                <div class="text-xl mb-1">🍳</div>
+                <div class="text-xs text-gray-400 mt-1">
+                    @if($post->prep_time)
+                        {{ $post->prep_time }} min prep
+                    @endif
 
-                                <div class="text-xs uppercase tracking-wide text-gray-400">
-                                    Cook Time
-                                </div>
+                    @if($post->prep_time && $post->cook_time)
+                        ·
+                    @endif
 
-                                <div class="font-semibold text-gray-800 mt-1">
-                                    {{ $post->cook_time }} min
-                                </div>
-                            </div>
-                        @endif
+                    @if($post->cook_time)
+                        {{ $post->cook_time }} min cook
+                    @endif
+                </div>
 
-
-                        {{-- Total Time --}}
-                        @if($post->prep_time || $post->cook_time)
-                            <div class="bg-white p-4 text-center">
-                                <div class="text-xl mb-1">⏰</div>
-
-                                <div class="text-xs uppercase tracking-wide text-gray-400">
-                                    Total Time
-                                </div>
-
-                                <div class="font-semibold text-gray-800 mt-1">
-                                    {{ ($post->prep_time ?? 0) + ($post->cook_time ?? 0) }} min
-                                </div>
-                            </div>
-                        @endif
+            </div>
+        @endif
 
 
-                        {{-- Servings --}}
-                        @if($post->servings)
-                            <div class="bg-white p-4 text-center">
-                                <div class="text-xl mb-1">🍽️</div>
+        {{-- Servings --}}
+        @if($post->servings)
+            <div class="bg-white p-4 text-center">
 
-                                <div class="text-xs uppercase tracking-wide text-gray-400">
-                                    Servings
-                                </div>
+                <div class="text-xl mb-1">🍽️</div>
 
-                                <div class="font-semibold text-gray-800 mt-1">
-                                    {{ $post->servings }}
-                                </div>
-                            </div>
-                        @endif
+                <div class="text-xs uppercase tracking-wide text-gray-400">
+                    Servings
+                </div>
 
+                <div class="font-semibold text-gray-800 mt-1">
+                    {{ $post->servings }}
+                </div>
 
-                        {{-- Protein --}}
-                        @if($post->protein)
-                            <div class="bg-white p-4 text-center">
-                                <div class="text-xl mb-1">💪</div>
-
-                                <div class="text-xs uppercase tracking-wide text-gray-400">
-                                    Protein
-                                </div>
-
-                                <div class="font-semibold text-gray-800 mt-1">
-                                    {{ rtrim(rtrim(number_format($post->protein, 2, '.', ''), '0'), '.') }} g
-                                </div>
-                            </div>
-                        @endif
-
-                    </div>
-
-                @endif
+            </div>
+        @endif
 
 
-                {{-- Calories --}}
-                @if($post->calories)
+        {{-- Protein --}}
+        @if($post->protein)
+            <div class="bg-white p-4 text-center">
 
-                    <div class="px-6 py-4 bg-white border-t border-gold-100">
+                <div class="text-xl mb-1">💪</div>
 
-                        <div class="flex items-center justify-between">
+                <div class="text-xs uppercase tracking-wide text-gray-400">
+                    Protein
+                </div>
 
-                            <span class="text-sm text-gray-500">
-                                🔥 Calories per serving
-                            </span>
+                <div class="font-semibold text-gray-800 mt-1">
+                    {{ rtrim(rtrim(number_format($post->protein, 2, '.', ''), '0'), '.') }} g
+                </div>
 
-                            <span class="font-semibold text-gray-800">
-                                {{ $post->calories }} kcal
-                            </span>
+            </div>
+        @endif
 
-                        </div>
+    </div>
 
-                    </div>
+@endif
 
-                @endif
 
+{{-- Ingredients + Instructions --}}
 
                 {{-- Ingredients + Instructions --}}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-6">
